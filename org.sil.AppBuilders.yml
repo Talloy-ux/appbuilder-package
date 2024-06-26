@@ -1,0 +1,144 @@
+#app-id: org.gluonhq.SceneBuilder
+app-id: org.sil.AppBuilders
+#branch: '1.0'
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+- org.freedesktop.Sdk.Extension.openjdk17
+- org.freedesktop.Sdk.Extension.node20
+finish-args:
+- "--env=PATH=/app/jre/bin:/usr/bin"
+- "--env=PATH=/app/jdk:usr/lib/jvm"
+#Window x11 socket access
+- --socket=x11
+#XShm access
+- --share=ipc
+#Graphical acceleration
+- "--device=dri"
+#Network access
+- --share=network
+#Audio access
+- --socket=pulseaudio
+#Local file browsing access
+- --filesystem=host
+#- --filesystem=home
+#System libraries (may be inherited by host permission above
+# which would make this redundant)
+#- --filesystem=host-os
+#Temporary file access
+- --filesystem=/tmp
+#OpenJDK location access
+- --filesystem=/usr/sbin
+#Python location access
+- --filesystem=/usr/bin
+###
+#use persist option to specify that these directories
+#are accessible and changeable by the app [?]
+- --persist=/usr/sbin
+- --persist=/usr/bin
+###
+#USB Access
+- --system-talk-name=org.freedesktop.Udisks2
+#^this^ versis access to all devices, cameras, perihperals --> - --device=all
+#File saving access
+- --system-talk-name=org.freedesktop.FileManager1
+#^this^ vs Local documents acces only? --> - --filesystem=xdg-documents
+
+#- --persist=.appbuilder
+
+#rename-desktop-file: appbuilders.desktop
+#rename-appdata-file: appbuilders.appdata.xml
+command: /app/app-builders/bin/AppBuilders-run
+
+modules:
+
+- name: openjdk17
+  buildsystem: simple
+  build-commands:
+    - "/usr/lib/sdk/openjdk17/install.sh"
+    - "/usr/lib/sdk/openjdk17/installjdk.sh"
+    - "/usr/lib/sdk/openjdk17/enable.sh"
+
+# - name: node20
+#   buildsystem: simple
+#   build-options:
+#       append-path: /usr/lib/sdk/node20/bin
+#   build-commands:
+#     - "/usr/lib/sdk/node20/lib/install.sh"
+#     - "/usr/lib/sdk/node20/lib/install-sdk.sh"
+#     - "/usr/lib/sdk/node20/lib/enable.sh"
+
+- name: AppBuilders
+  buildsystem: simple
+  build-commands:
+    - mkdir /app/app-builders
+    - tar xvzf app-builders.tgz -C /app/app-builders
+    - unzip -q -j -d sdk sdk.zip '*lib/*'
+    - mkdir /app/lib
+    - mv sdk /app/lib/sdk
+    - install -Dm755 AppBuilders-run /app/app-builders/bin/AppBuilders-run
+
+  sources:
+#    - type: file
+#      path: build.sh
+    - type: file
+      path: ./output/app-builders.tgz
+    - type: file
+      only-arches:
+      - x86_64
+      dest-filename: sdk.zip
+      url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11_linux-x64_bin-sdk.zip
+      sha256: f46a1fbea32b83cca6715d74cba7d9c24ce320f1da2daf8ff852f133e9f15674
+    - type: file
+      only-arches:
+      - aarch64
+      dest-filename: sdk.zip
+      url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11-javadoc.zip
+      sha256: 92695d1be7bd1d08562444ad5325cc9f08410b18a1f1aebb4a7cc96d854d6cfc
+    - type: script
+      dest-filename: AppBuilders-run
+      commands:
+      ###
+      #TODO: test exec on all: scripture-app-builder.jar, dictionary-app-builder.jar, reading-app-builder.jar, keyboard-app-builder.jar
+      ###
+        # - exec /app/jre/bin/java --module-path /app/lib/sdk --add-modules javafx.web,javafx.fxml,javafx.swing,javafx.media 
+        #   --add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED -cp /app/lib/SceneBuilder.jar 
+        #   com.oracle.javafx.scenebuilder.app.SceneBuilderApp $@
+        #   com.oracle.javafx.scenebuilder.app.SceneBuilderApp $@
+        - echo "Packaging successful within sandboxed app"
+        - echo $( pwd )
+        - echo " "
+        - echo $( /app/jre/bin/java -version )
+        - echo $( /app/jdk/bin/javac -version )
+        - echo " "
+        - exec /app/jre/bin/java --module-path /app/lib/sdk --add-modules javafx.web,javafx.fxml,javafx.swing,javafx.media 
+          --add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED -cp /app/app-builders/bin/scripture-app-builder.jar
+          -jar /app/app-builders/bin/scripture-app-builder.jar $@
+
+#- name: javafx
+#  buildsystem: simple
+#  build-commands:
+#  - mkdir -p /app/javafx
+#  - cp -r ./ /app/javafx
+#  sources:
+#  - type: archive
+#    only-arches:
+#    - x86_64
+#    url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11_linux-x64_bin-sdk.zip
+#    sha256: f46a1fbea32b83cca6715d74cba7d9c24ce320f1da2daf8ff852f133e9f15674
+#  - type: archive
+#    only-arches:
+#    - aarch64
+#    url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11-javadoc.zip
+#    sha256: 92695d1be7bd1d08562444ad5325cc9f08410b18a1f1aebb4a7cc96d854d6cfc
+
+- python3-aeneas.yml
+
+###
+#Install for node20 within the app. Do we need node in its entirety
+#on the user end? The yaml file commented out at EOF could potentially replace this. The yaml can also be run independently like this: 
+#flatpak-builder build-dir --user --ccache --force-clean --install org.freedesktop.Sdk.Extension.node20.yaml
+#^which^ is what the author recommends but that appears to be installing it separately...can we run/call it within app-builders when it's needed?
+###
+#- org.freedesktop.Sdk.Extension.node20.yaml

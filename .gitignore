@@ -1,0 +1,7 @@
+/.flatpak-builder
+/build-dir
+/build
+/output
+#temporary? : node20 ignore
+/org.freedesktop.Sdk.Extension.node20.metainfo.xml
+/org.freedesktop.Sdk.Extension.node20.yaml
