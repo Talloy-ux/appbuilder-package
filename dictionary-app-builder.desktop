@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Dictionary App Builder
+Comment=Build customized Dictionary apps for Android smartphones and tablets
+Exec=dictionary-app-builder %u
+Icon=dictionary-app-builder
+Terminal=false
+Type=Application
+Categories=Development;
+X-Desktop-File-Install-Version=0.21
+StartupWMClass=org-sil-app-builder-dictionary-DictionaryAppBuilder

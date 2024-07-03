@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Scripture App Builder
+Comment=Build customized Scripture apps for Android smartphones and tablets
+Exec=app/bin/AppBuilders-run %u
+Icon=scripture-app-builder
+Terminal=false
+Type=Application
+Categories=Development;
+X-Desktop-File-Install-Version=0.21
+StartupWMClass=org-sil-app-builder-scripture-ScriptureAppBuilder

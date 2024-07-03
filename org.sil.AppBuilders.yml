@@ -1,89 +1,89 @@
-#app-id: org.gluonhq.SceneBuilder
+# REFERENCES:
+# Python2.7:  https://github.com/flathub/shared-modules/blob/cc50bdbb34cc3d29bf61cfea5e27cd980b7bda04/python2.7/python-2.7.json
+# OpenJDK: https://github.com/flathub/org.freedesktop.Sdk.Extension.openjdk17/blob/branch/23.08/org.freedesktop.Sdk.Extension.openjdk17.yaml
+# Node:    https://github.com/flathub/org.freedesktop.Sdk.Extension.node20/blob/branch/23.08/org.freedesktop.Sdk.Extension.node20.yaml
 app-id: org.sil.AppBuilders
-#branch: '1.0'
-runtime: org.freedesktop.Platform
-runtime-version: '23.08'
-sdk: org.freedesktop.Sdk
+runtime: org.gnome.Platform
+runtime-version: "46"
+sdk: org.gnome.Sdk
+# Gnome alternatives
+# runtime: org.freedesktop.Platform
+# runtime-version: '23.08'
+# sdk: org.freedesktop.Sdk
 sdk-extensions:
-- org.freedesktop.Sdk.Extension.openjdk17
-- org.freedesktop.Sdk.Extension.node20
+  - org.freedesktop.Sdk.Extension.openjdk17
 finish-args:
-- "--env=PATH=/app/jre/bin:/usr/bin"
-- "--env=PATH=/app/jdk:usr/lib/jvm"
-#Window x11 socket access
-- --socket=x11
-#XShm access
-- --share=ipc
-#Graphical acceleration
-- "--device=dri"
-#Network access
-- --share=network
-#Audio access
-- --socket=pulseaudio
-#Local file browsing access
-- --filesystem=host
-#- --filesystem=home
-#System libraries (may be inherited by host permission above
-# which would make this redundant)
-#- --filesystem=host-os
-#Temporary file access
-- --filesystem=/tmp
-#OpenJDK location access
-- --filesystem=/usr/sbin
-#Python location access
-- --filesystem=/usr/bin
-###
-#use persist option to specify that these directories
-#are accessible and changeable by the app [?]
-- --persist=/usr/sbin
-- --persist=/usr/bin
-###
-#USB Access
-- --system-talk-name=org.freedesktop.Udisks2
-#^this^ versis access to all devices, cameras, perihperals --> - --device=all
-#File saving access
-- --system-talk-name=org.freedesktop.FileManager1
-#^this^ vs Local documents acces only? --> - --filesystem=xdg-documents
-
-#- --persist=.appbuilder
-
-#rename-desktop-file: appbuilders.desktop
-#rename-appdata-file: appbuilders.appdata.xml
+  # Window x11 socket access
+  - --socket=x11
+  # XShm access
+  - --share=ipc
+  # Graphical acceleration
+  - "--device=dri"
+  # Network access
+  - --share=network
+  # Audio access
+  - --socket=pulseaudio
+  # Local file browsing access
+  - --filesystem=host
+  # Temporary file access
+  - --filesystem=/tmp
+  # USB Access
+  - --system-talk-name=org.freedesktop.Udisks2
+  # File saving access
+  - --system-talk-name=org.freedesktop.FileManager1
 command: /app/app-builders/bin/AppBuilders-run
 
 modules:
-
-- name: openjdk17
-  buildsystem: simple
-  build-commands:
-    - "/usr/lib/sdk/openjdk17/install.sh"
-    - "/usr/lib/sdk/openjdk17/installjdk.sh"
-    - "/usr/lib/sdk/openjdk17/enable.sh"
-
-# - name: node20
-#   buildsystem: simple
-#   build-options:
-#       append-path: /usr/lib/sdk/node20/bin
-#   build-commands:
-#     - "/usr/lib/sdk/node20/lib/install.sh"
-#     - "/usr/lib/sdk/node20/lib/install-sdk.sh"
-#     - "/usr/lib/sdk/node20/lib/enable.sh"
-
 - name: AppBuilders
   buildsystem: simple
   build-commands:
-    - mkdir /app/app-builders
-    - tar xvzf app-builders.tgz -C /app/app-builders
-    - unzip -q -j -d sdk sdk.zip '*lib/*'
-    - mkdir /app/lib
-    - mv sdk /app/lib/sdk
+    - mkdir -p /app/output
+    - tar xvzf app-builders.tgz -C /app/output
+    - mkdir -p app/app-builders
+    - mkdir -p /app/app-builders/bin
+    #- cp -R output/tmp/bin/* app/app-builders/bin/
+    #- cp -R output/tmp/fonts output/tmp/images output/tmp/html output/tmp/info output/tmp/lib output/tmp/docs output/tmp/tools output/tmp/pwa output/tmp/VERSION app/app-builders/
+    - cp -RPn /app/output/bin/* /app/app-builders/bin/
+    - cp -RPn /app/output/fonts /app/output/images /app/output/html /app/output/info /app/output/lib /app/output/docs /app/output/tools /app/output/pwa /app/output/VERSION /app/app-builders/
+    # JavaFX SDK
+    #- unzip -q -j -d sdk sdk.zip '*lib/*'
+    # - mkdir /app/lib
+    #- mv sdk /app/lib/sdk
+    # desktop files and Icons
+    - mkdir -p  /app/share/applications
+    - install -Dt app/share/applications scripture-app-builder.desktop
+    - install -Dt app/share/applications reading-app-builder.desktop
+    - install -Dt app/share/applications keyboard-app-builder.desktop
+    - install -Dt app/share/applications dictionary-app-builder.desktop 
+    - mkdir -p /app/share/app-icons/non-scalable
+    - mkdir -p /app/share/app-icons/scalable
+    - install -Dt /app/share/app-icons/non-scalable /app/output/app-icons/*.png
+    - install -Dt /app/share/app-icons/scalable /app/output/app-icons/*.svg
     - install -Dm755 AppBuilders-run /app/app-builders/bin/AppBuilders-run
-
+    - rm -r /app/output/*
   sources:
-#    - type: file
-#      path: build.sh
+    - type: script
+      dest-filename: AppBuilders-run
+      commands:
+    ###
+    #TODO: test exec on all: scripture-app-builder.jar, dictionary-app-builder.jar, reading-app-builder.jar, keyboard-app-builder.jar
+    ###
+        - echo "Running sandboxed app in:"
+        - echo $( pwd )
+        - echo " "
+        - echo " "
+        - echo $( /app/jre/bin/java -version )
+        - echo $( /app/jdk17.0.11/bin/javac -version )
+        - echo $( javafx -version )
+        - echo $( python3 --version )
+        - echo $( which python3 )
+        - echo $( python3 -m aeneas.diagnostics )
+        - echo " "
+        - echo " "
+        - exec /app/jre/bin/java --module-path /app/lib/sdk --add-modules javafx.web,javafx.fxml,javafx.swing,javafx.media 
+          --add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED -jar /app/bin/scripture-app-builder.jar $@
     - type: file
-      path: ./output/app-builders.tgz
+      path: output/app-builders.tgz
     - type: file
       only-arches:
       - x86_64
@@ -96,49 +96,103 @@ modules:
       dest-filename: sdk.zip
       url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11-javadoc.zip
       sha256: 92695d1be7bd1d08562444ad5325cc9f08410b18a1f1aebb4a7cc96d854d6cfc
-    - type: script
-      dest-filename: AppBuilders-run
-      commands:
-      ###
-      #TODO: test exec on all: scripture-app-builder.jar, dictionary-app-builder.jar, reading-app-builder.jar, keyboard-app-builder.jar
-      ###
-        # - exec /app/jre/bin/java --module-path /app/lib/sdk --add-modules javafx.web,javafx.fxml,javafx.swing,javafx.media 
-        #   --add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED -cp /app/lib/SceneBuilder.jar 
-        #   com.oracle.javafx.scenebuilder.app.SceneBuilderApp $@
-        #   com.oracle.javafx.scenebuilder.app.SceneBuilderApp $@
-        - echo "Packaging successful within sandboxed app"
-        - echo $( pwd )
-        - echo " "
-        - echo $( /app/jre/bin/java -version )
-        - echo $( /app/jdk/bin/javac -version )
-        - echo " "
-        - exec /app/jre/bin/java --module-path /app/lib/sdk --add-modules javafx.web,javafx.fxml,javafx.swing,javafx.media 
-          --add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED -cp /app/app-builders/bin/scripture-app-builder.jar
-          -jar /app/app-builders/bin/scripture-app-builder.jar $@
+    - type: file
+      path: scripture-app-builder.desktop
+    - type: file
+      path: reading-app-builder.desktop
+    - type: file
+      path: keyboard-app-builder.desktop
+    - type: file
+      path: dictionary-app-builder.desktop
+    # - type: file
+    #   path: ./output/tmp/app-icons/scripture-app-builder.png
+    # - type: file
+    #   path: ./output/tmp/app-icons/scripture-app-builder.svg
 
-#- name: javafx
-#  buildsystem: simple
-#  build-commands:
-#  - mkdir -p /app/javafx
-#  - cp -r ./ /app/javafx
-#  sources:
-#  - type: archive
-#    only-arches:
-#    - x86_64
-#    url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11_linux-x64_bin-sdk.zip
-#    sha256: f46a1fbea32b83cca6715d74cba7d9c24ce320f1da2daf8ff852f133e9f15674
-#  - type: archive
-#    only-arches:
-#    - aarch64
-#    url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11-javadoc.zip
-#    sha256: 92695d1be7bd1d08562444ad5325cc9f08410b18a1f1aebb4a7cc96d854d6cfc
+- name: python
+  sources:
+  - type: archive
+    url: https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tar.xz
+    sha256: f6d419a6d8743ab26700801b4908d26d97e8b986e14f95de31b32de2b0e79554
+  post-install:
+  #Unnecessary?
+  - chmod 644 $FLATPAK_DEST/lib/libpython3.12.a
+  cleanup:
+  - "/bin/2to3*"
+  - "/bin/easy_install*"
+  - "/bin/idle*"
+  - "/bin/pydoc*"
+  - "/bin/python*-config"
+  - "/bin/pyvenv*"
+  - "/include"
+  - "/lib/pkgconfig"
+  - "/lib/python*/config"
+  - "/share"
+  - "/lib/python*/test"
+  - "/lib/python*/*/test"
+  - "/lib/python*/*/tests"
+  - "/lib/python*/lib-tk/test"
+  - "/lib/python*/lib-dynload/_*_test.*.so"
+  - "/lib/python*/lib-dynload/_test*.*.so"
+  - "/lib/python*/idlelib"
+  - "/lib/python*/tkinter*"
+  - "/lib/python*/turtle*"
+  - "/lib/python*/lib2to3*"
+  - "/lib/python3.12.4/config-3.12*/libpython3.12.a"
 
+- name: openjdk17
+  buildsystem: simple
+  build-commands:
+    # jre
+    - "/usr/lib/sdk/openjdk17/install.sh"
+    # jdk
+    - "/usr/lib/sdk/openjdk17/installjdk.sh"
+    # exports
+    - "/usr/lib/sdk/openjdk17/enable.sh"
+    # Rename
+    - mkdir /app/jdk17.0.11
+    - mv /app/jdk/* /app/jdk17.0.11/
+    - rm -r /app/jdk
+
+- name: node
+  buildsystem: simple
+  build-options:
+    prefix: /usr/lib/sdk/node20
+    prepend-path: /usr/lib/sdk/node20/bin
+    prepend-ld-library-path: /usr/lib/sdk/node20/lib
+  cleanup:
+    - /lib/pkgconfig
+    - /share/doc
+    - /share/man
+    - /share/systemtap
+    - /lib/node_modules/npm/man
+    - /lib/node_modules/npm/docs
+  build-commands:
+    - mkdir -p /app/app-builders/tools
+    - cp -r /usr/lib/sdk/node20 /app/app-builders/tools
+    - mkdir -p /app/app-builders/tools/node
+    - mv /app/app-builders/tools/node20/* /app/app-builders/tools/node/
+    - rm -r /app/app-builders/tools/node20
+    - export PATH=$PATH:/usr/lib/sdk/node20/bin
+    - export npm_config_nodedir=/usr/lib/sdk/node20
+  sources:
+    - type: archive
+      url: https://nodejs.org/dist/v20.15.0/node-v20.15.0.tar.xz
+      sha256: 0f4a7a051c35d95eb905e8cb2aa43c5d402b131203908fe633eb3cfa050ef907
+
+# Might need this for xterm
+- name: libxmu
+  buildsystem: autotools
+  cleanup:
+      - "/include"
+      - "*.a"
+  sources:
+      - type: git
+        url: https://gitlab.freedesktop.org/xorg/lib/libxmu.git
+        #commit: e9efe2d027b4c46cf6834cc532222f8ad1d1d3c3
+        commit: cc378e4f0cc2ab5b66d378050ba4956612a01197
+
+#Additional modules that were convenient to define in another file
 - python3-aeneas.yml
 
-###
-#Install for node20 within the app. Do we need node in its entirety
-#on the user end? The yaml file commented out at EOF could potentially replace this. The yaml can also be run independently like this: 
-#flatpak-builder build-dir --user --ccache --force-clean --install org.freedesktop.Sdk.Extension.node20.yaml
-#^which^ is what the author recommends but that appears to be installing it separately...can we run/call it within app-builders when it's needed?
-###
-#- org.freedesktop.Sdk.Extension.node20.yaml
+- xterm.yml
