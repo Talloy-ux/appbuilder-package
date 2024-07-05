@@ -31,6 +31,7 @@ sources:
 #      url: https://files.pythonhosted.org/packages/1c/d9/8c507915ff962b9e854b477b203c171074f59cce9465dac9f71c2b57ebd6/beautifulsoup4-4.9.3-py2-none-any.whl
 #      sha256: 4c98143716ef1cb40bf7f39a8e3eec8f8b009509e74904ba3a7b315431577e35
 modules:
+    #~1m
     - name: espeak
       buildsystem: simple
       build-commands:
