@@ -1,0 +1,151 @@
+# REFERENCES:
+  # Python2.7:  https://github.com/flathub/shared-modules/blob/cc50bdbb34cc3d29bf61cfea5e27cd980b7bda04/python2.7/python-2.7.json
+  # OpenJDK: https://github.com/flathub/org.freedesktop.Sdk.Extension.openjdk17/blob/branch/23.08/org.freedesktop.Sdk.Extension.openjdk17.yaml
+  # Node:    https://github.com/flathub/org.freedesktop.Sdk.Extension.node20/blob/branch/23.08/org.freedesktop.Sdk.Extension.node20.yaml
+# FIRST-TIME-BUILD: ~30m on 10-20Mb/s download speed
+app-id: org.sil.app-builders
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+
+# Finish args give resource access to the app after the build like a post-install
+finish-args:
+  # x11 socket access
+  - --socket=x11
+  # XShm access
+  - --share=ipc
+  # Graphical acceleration
+  - --device=dri
+  # Network access
+  - --share=network
+  # Audio access
+  - --socket=pulseaudio
+  # Local file browsing access
+  - --filesystem=host
+  # Temporary file access
+  - --filesystem=/tmp
+  # USB Access
+  - --system-talk-name=org.freedesktop.Udisks2
+  # File saving access
+  - --system-talk-name=org.freedesktop.FileManager1
+  #Apparently a big security risk:
+  # - --socket=system-bus
+  # - --socket=session-bus
+  #Does the program absolutely need these for authorization?
+  - --socket=ssh-auth
+  - --socket=gpg-agent
+  # Pythonius : 
+  # This is only if python scripts need access to all modules on
+  # the host system. Can also be done after the build with
+  # `flatpak override org.sil.app-builders --filesystem=/usr/lib/python3/dist-packages`
+  # - --filesystem=/usr/lib/python3/dist-packages
+  # - --env=PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages
+
+# Build args give resource access during this manifest's build process
+build-options:
+  build-args:
+    - --share=network
+
+command: app-builders-run.sh
+
+modules:
+# Some modules were convenient to define in a separate file
+
+# Need "xterm" for terminal output in the app
+#~12m
+- xterm.yml
+
+# Need node20 for web app
+#~13s :D
+- ab-node20.yml
+
+#~17m
+- python3-aeneas.yml
+
+# Need "requests" to run docker_pull script in org.sil.app-builders module
+#~30s or less
+- python3-requests.yaml
+
+#~15s ;)
+#TODO: A java runtime is present in both the jdk and the jre. Decide if that's a good separation in case
+#the user breaks the java runtime in the jdk. That way a separate runtime in jre is still untouched and
+#used exclusively for running the app builder app itself. If the second runtime is just redundant and
+#the same runtime could be safely used to both run the app and build the apk's without conflict, then
+#remove the jre directory and change the "*-run.sh" script to execute java from /app/jdk/bin/java.
+- name: openjdk17
+  buildsystem: simple
+  build-commands:
+    # jre
+    - "/usr/lib/sdk/openjdk17/install.sh"
+    # jdk
+    - "/usr/lib/sdk/openjdk17/installjdk.sh"
+    # exports
+    - "/usr/lib/sdk/openjdk17/enable.sh"
+    # Rename
+    - mkdir /app/jdk17.0.11
+    - mv /app/jdk/* /app/jdk17.0.11/
+    - rm -r /app/jdk
+
+#~5m
+- name: app-builders
+  buildsystem: simple
+  # build-options:
+      # append-path: /usr/lib/python3/dist-packages
+  build-options:
+      append-ld-library-path: /usr/lib
+      # env:
+      #   PYTHONPATH: $PYTHONPATH:/usr/lib/python3/dist-packages
+  build-commands:
+    - pwd
+    - mkdir -p /app/output
+    # Script to source tarball from a docker image
+    - cd /tmp
+    - python3 /run/build/app-builders/docker_pull.py ghcr.io/sillsdev/app-builders:12.0
+    # Script to extract tarball
+    - python3 /run/build/app-builders/extract_layer.py /app/output
+    - rm sillsdev_app-builders.tar
+    # cd back to build directory
+    - cd /run/build/app-builders
+    # Copy only the necessary files
+    - mkdir -p app/app-builders
+    - mkdir -p /app/app-builders/bin
+    - cp -RPn /app/output/bin/* /app/app-builders/bin/
+    - cp -RPn /app/output/fonts /app/output/images /app/output/html /app/output/info /app/output/lib /app/output/docs /app/output/tools /app/output/pwa /app/output/VERSION /app/app-builders/
+    # JavaFX SDK
+    - unzip -q -j -d sdk sdk.zip '*lib/*'
+    #- mkdir /app/lib
+    - mv sdk /app/lib/sdk
+    # - mkdir -p /app/share/icons/hicolor/128x128/apps
+    # - mkdir -p /app/share/icons/hicolor/scalable/apps
+    ## Renames all app icons for flatpak's reverse dns format
+    # - for i in $( ls /app/output/app-icons ); do mv /app/output/app-icons/$i /app/output/app-icons/org.sil.app-builders-$i; done
+    # - install -m 644 -Dt /app/share/icons/hicolor/128x128/apps /app/output/app-icons/*.png
+    # - install -m 644 -Dt /app/share/icons/hicolor/scalable/apps /app/output/app-icons/*.svg
+    # Metainfo and runner script
+    - install -Dm644 org.sil.app-builders.metainfo.xml -t /app/share/metainfo/
+    - install -Dm755 app-builders-run.sh /app/bin/app-builders-run.sh
+    - rm -rf /app/output
+
+  sources:
+    - type: file
+      path: docker_pull.py
+    - type: file
+      path: extract_layer.py
+    - type: file
+      path: app-builders-run.sh
+    - type: file
+      path: org.sil.app-builders.metainfo.xml
+    - type: file
+      only-arches:
+      - x86_64
+      dest-filename: sdk.zip
+      url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11_linux-x64_bin-sdk.zip
+      sha256: f46a1fbea32b83cca6715d74cba7d9c24ce320f1da2daf8ff852f133e9f15674
+    - type: file
+      only-arches:
+      - aarch64
+      dest-filename: sdk.zip
+      url: https://download2.gluonhq.com/openjfx/17.0.11/openjfx-17.0.11-javadoc.zip
+      sha256: 92695d1be7bd1d08562444ad5325cc9f08410b18a1f1aebb4a7cc96d854d6cfc

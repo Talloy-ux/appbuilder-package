@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2024 SIL [author name]-->
+<component type="console-application">
+  <id>org.sil.app-builders</id>
+  
+  <name>App Builders</name>
+
+  <summary>Build customized apps for Android smartphones and tablets</summary>
+  
+  <developer id="org.sil">
+    <name>SIL International</name>
+  </developer>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <categories>
+    <category>Development</category>
+    <category>Building</category>
+  </categories>
+
+  <content_rating type="oars-1.1" />
+  
+  <provides>
+    <!-- <id>org.sil.app-builders</id> -->
+    <binary>app-builders-run.sh</binary>
+    <id>org.sil.app-builders scripture-app-builder</id>
+    <id>org.sil.app-builders reading-app-builder</id>
+    <id>org.sil.app-builders keyboard-app-builder</id>
+    <id>org.sil.app-builders dictionary-app-builder</id>
+  </provides>
+
+<!-- <icon type="stock">org.sil.app-builders-scripture-app-builder</icon>
+<icon type="stock">org.sil.app-builders-reading-app-builder</icon>
+<icon type="stock">org.sil.app-builders-keyboard-app-builder</icon>
+<icon type="stock">org.sil.app-builders-dictionary-app-builder</icon> -->
+
+  <url type="homepage">https://software.sil.org/software-products/</url>
+  <!--flathub's linter complained about redirects from https://sil-appbuilder.freshdesk.com/support/login
+  and https://sil-appbuilder.freshdesk.com/support/home-->
+  <url type="bugtracker">https://sil-appbuilder.freshdesk.com/support/tickets/new</url>
+  <!--sab faq page-->
+  <url type="faq">https://software.sil.org/scriptureappbuilder/support/faq/</url>
+  <!--sab documentation page-->
+  <url type="help">https://software.sil.org/scriptureappbuilder/resources/</url>
+  <!--https://give.sil.org/give/485238/#!/donation/checkout returned a 403 permissions error acorrding to flathub's linter-->
+  <url type="donation">https://give.sil.org</url>
+  <url type="contribute">https://community.software.sil.org/</url>
+  <url type="contact">https://software.sil.org/about/contact/</url>
+
+  <description>
+    <p>
+      This is a combined package of Scripture App Builder, Reading App Builder, Dictionary App Builder, and Keyboard App Builder. 
+    </p>
+    <p>
+      <em>Scripture App Builder</em> helps you to build customized Scripture apps for Android and iOS smartphones and tablets. You specify the Scripture files to use, the app name, the fonts, the colors, the about box information, the audio and the icons. Scripture App Builder will package everything together and build the customized app for you. You can then install it on your phone, send it to others by Bluetooth, share it on microSD memory cards and publish it to app stores on the Internet.
+    </p>
+    <p>
+    <em>Reading App Builder</em> helps you build customized apps for smartphones and tablets. You can use it to make apps containing picture books, health and community development materials, song books, illustrated stories and libraries of easy-to-read books for new readers – each with the option of synchronizing text and audio, highlighting each phrase as it is read. The app menus, icon, splash screen and colors can all be customized for your language and culture. To build an app, you specify the text and audio files, the app name, the fonts, the colors, the about box information and the icons. Reading App Builder will package everything together and compile the customized app for you. You can then install it on your mobile device, send it to others by Bluetooth, share it on microSD memory cards and publish it to app stores on the Internet.
+    </p>
+    <p>
+    <em>Keyboard App Builder</em> helps you to build customized keyboard apps for Android smartphones and tablets. A keyboard app allows users to add a system keyboard to their device, enabling them to type in their language within other apps such as Gmail, Facebook and WhatsApp. To build an app, you specify the Keyman keyboard layout files and lexical models to use, the app name, the fonts, the colors, the about box information and the icons. Keyboard App Builder will package everything together and build the customized app for you. You can then install it on your phone, send it to others by Bluetooth, share it on microSD memory cards and publish it to app stores on the Internet.
+    </p>
+    <p>
+    <em>Dictionary App Builder</em> helps you to build customized dictionary apps for Android and iOS smartphones and tablets. You specify the lexicon data file to use, the app name, fonts, colors, the about box information, the audio, illustrations and the icons. Dictionary App Builder will package everything together and build the customized app for you. You can then install it on your phone, send it to others by Bluetooth, share it on microSD memory cards and publish it to app stores on the Internet.
+    </p>
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>App Building Process</caption>
+      <image>https://software.sil.org/scriptureappbuilder/wp-content/uploads/sites/10/2015/04/SabProcess1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Audio Playback and Text Synchronization</caption>
+      <image>https://software.sil.org/scriptureappbuilder/wp-content/uploads/sites/10/2015/03/Audio-Playback-972x1024.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <!-- <release date=" " version="12.0"> -->
+    <release version="11.4.4" date="2024-07-17">
+      <url type="details">https://software.sil.org/scriptureappbuilder/release-notes/</url>
+      <url type="details">https://software.sil.org/readingappbuilder/release-notes/</url>
+      <url type="details">https://software.sil.org/keyboardappbuilder/release-notes/</url>
+      <url type="details">https://software.sil.org/dictionaryappbuilder/release-notes/</url>
+    </release>
+  </releases>
+
+</component>

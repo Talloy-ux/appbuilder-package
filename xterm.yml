@@ -1,4 +1,3 @@
-# for xterm (used by run pwa [buildpwa.sh?])
 name: xterm
 sources:
   #~2m
@@ -14,14 +13,27 @@ sources:
       tag-template: xterm-$version
       is-main-source: true
 modules:
+  # Added xmu for x-term
+  #~2m
+  - name: libxmu
+    buildsystem: autotools
+    cleanup:
+        - "/include"
+        - "*.a"
+    sources:
+        - type: git
+          url: https://gitlab.freedesktop.org/xorg/lib/libxmu.git
+          #commit: e9efe2d027b4c46cf6834cc532222f8ad1d1d3c3
+          commit: cc378e4f0cc2ab5b66d378050ba4956612a01197
   #~2m
   - name: libXaw
     sources: &libXaw-sources
       - type: archive
-        # url: https://www.x.org/archive/individual/lib/libXaw-1.0.15.tar.xz
-        # sha256: ab35f70fde9fb02cc71b342f654846a74328b74cb3a0703c02d20eddb212754a
         url: https://www.x.org/archive/individual/lib/libXaw-1.0.16.tar.xz
         sha256: 731d572b54c708f81e197a6afa8016918e2e06dfd3025e066ca642a5b8c39c8f
+        # OLD
+        # url: https://www.x.org/archive/individual/lib/libXaw-1.0.15.tar.xz
+        # sha256: ab35f70fde9fb02cc71b342f654846a74328b74cb3a0703c02d20eddb212754a
   #~2m
   - name: libXaw-32bit
     sources: *libXaw-sources

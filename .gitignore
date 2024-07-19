@@ -2,14 +2,7 @@
 /build-dir
 /build
 /output
-/.gitmodules
-#temporary? : node20 ignore
-/org.freedesktop.Sdk.Extension.node20.metainfo.xml
-/org.freedesktop.Sdk.Extension.node20.yaml
-/sab.sh
-/rab.sh
-/dab.sh
-/kab.sh
-/build.sh
-/select.sh
-/images
+/runners/
+/artifacts
+/extra
+/README copy.md
